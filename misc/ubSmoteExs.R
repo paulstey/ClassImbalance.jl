@@ -10,8 +10,8 @@ function(data,tgt,N=200,k=5) {
   # examples with rare values on the target
 
   nomatr <- c()                                     # vector of nominal variables
-  T <- matrix(nrow=dim(data)[1],ncol=dim(data)[2]-1)
-  for(col in seq.int(dim(T)[2])){
+  T <- matrix(nrow = dim(data)[1], ncol = dim(data)[2]-1)
+  for (col in seq.int(dim(T)[2])) {
     cl <- class(data[,col])
 
     if (cl %in% c('Date','POSIXct','POSIXt'))
@@ -41,12 +41,13 @@ function(data,tgt,N=200,k=5) {
   # for each member of T
   new <- matrix(nrow=nexs*nT,ncol=p)    # the new cases
 
-  for(i in 1:nT) {
+  for (i in 1:nT) {
 
     # the k NNs of case T[i,]
     xd <- scale(T,T[i,],ranges)
-    for(a in nomatr)
-      xd[,a] <- xd[,a]==0
+    for (a in nomatr) {
+      xd[,a] <- xd[,a] == 0
+    }
     dd <- drop(xd^2 %*% rep(1, ncol(xd)))
     kNNs <- order(dd)[2:(k+1)]
 
@@ -59,15 +60,15 @@ function(data,tgt,N=200,k=5) {
       # the attribute values of the generated case
       difs <- T[kNNs[neig],]-T[i,]
       new[(i-1)*nexs+n,] <- T[i,]+runif(1)*difs
-      for(a in nomatr)
+      for (a in nomatr) {
         new[(i-1)*nexs+n,a] <- c(T[kNNs[neig],a],T[i,a])[1+round(runif(1),0)]
-
+      }
     }
   }
   newCases <- data.frame(new)
-  for(a in nomatr)
-    newCases[,a] <- factor(newCases[,a],levels=1:nlevels(data[,a]),labels=levels(data[,a]))
-
+  for (a in nomatr) {
+      newCases[,a] <- factor(newCases[,a],levels=1:nlevels(data[,a]),labels=levels(data[,a]))
+  }
   newCases[,tgt] <- factor(rep(data[1,tgt],nrow(newCases)),levels=levels(data[,tgt]))
   colnames(newCases) <- colnames(data)
   newCases
