@@ -1,7 +1,7 @@
 # ubSmoteExs.R
 using DataFrames 
 
-d = readtable("people.csv", makefactors = true)
+d = readtable("./data/people.csv", makefactors = true)
 
 function factor_cols(dat::DataFrame)
     p = size(dat, 2)
@@ -27,15 +27,20 @@ function factor_to_float(v)
         cat_dictionary[Nullable(k)] = val 
         val += 1.0 
     end 
-    out = map(x -> cat_dictionary[x], v)
+    n = length(v)
+    out = Array{Float64, 1}(n)
+    for i = 1:n 
+        out[i] = cat_dictionary[v[i]]
+    end 
     out 
 end 
 
 
 function float_to_factor(v, levels)
     sort!(levels)
-    out = map(x -> levels[Int(round(x))], v)
-    return out 
+    str_vect = map(x -> levels[Int(round(x))], v)
+    out = CategoricalArray(str_vect) 
+    return out
 end 
 
 
@@ -53,16 +58,29 @@ function rscale(X, center, scale)
 end 
 
 
+function column_ranges(X)
+    p = size(X, 2)
+    ranges = Array{Float64,1}(p)
+
+    for j = 1:p 
+        ranges[j] = maximum(X[:, j]) - minimum(X[:, j])
+    end 
+    ranges 
+end 
+
+
 function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
-    n, p = size(dat)
-    T = Array{Float64, 2}(n, p-1)
-    factor_indcs = factor_cols(dat)
+    n, m = size(dat)
+    T = Array{Float64, 2}(n, m-1)
+
+    # assume outcome var is last column
+    factor_indcs = factor_cols(dat)[1:end-1] 
     
     for j = 1:size(T, 2)
         if j ∈ factor_indcs
             T[:, j] = factor_to_float(dat[:, j])
         else 
-            T[:, j] = dat[:, j]
+            T[:, j] = convert(Array{Float64,1}, dat[:, j])
         end 
     end 
 
@@ -73,11 +91,9 @@ function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
     end 
 
     n, p = size(T)
-    ranges = zeros(p)
-    for j = 1:p 
-        ranges[j] = maximum(T[:, j]) - minimum(T[:, j])
-    end 
-
+    display(T)
+    ranges = column_ranges(T)
+    
     n_exs = Int(round(N/100))   # num. of artificial ex for each member of T
     xnew = Array{Float64, 2}(n_exs*n, p)
 
@@ -111,12 +127,16 @@ function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
 
     new_cases = DataFrame()
     for j = 1:p
-        if j ∈ factor_cols
-            new_cases[:, j] = 
+        if j ∈ factor_indcs
+            new_cases[:, j] = float_to_factor(xnew[:, j], levels(dat[:, j]))
         else 
             new_cases[:, j] = xnew[:, j]
         end 
     end 
+    yval = String(dat[1, tgt].value)
+    new_cases[:, tgt] = CategoricalArray(repeat([yval], inner = n))
+    return new_cases
+end
 
 
 
