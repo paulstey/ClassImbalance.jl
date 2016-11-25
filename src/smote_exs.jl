@@ -134,7 +134,7 @@ function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
         end 
     end 
     yval = String(dat[1, tgt].value)
-    new_cases[:, tgt] = CategoricalArray(repeat([yval], inner = n))
+    new_cases[:, tgt] = CategoricalArray(repeat([yval], inner = n_exs*n))
     return new_cases
 end
 
