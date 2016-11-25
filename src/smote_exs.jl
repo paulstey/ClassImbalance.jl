@@ -15,7 +15,7 @@ function factor_cols(dat::DataFrame)
     return indcs 
 end 
 
-factor_cols(d)
+@code_warntype factor_cols(d)
 
 
 function factor_to_float(v)
