@@ -1,4 +1,4 @@
-ubSmoteExs2 <- function(data, tgt, N = 200, k = 5) {
+ubSmoteExs <- function(data, tgt, N = 200, k = 5) {
     # INPUTS:
     # data are the rare cases (the minority "class" cases)
     # tgt is the name of the target variable
@@ -77,9 +77,11 @@ ubSmoteExs2 <- function(data, tgt, N = 200, k = 5) {
     return(newCases)
 }
 #
-# v <- rnorm(1000)
-# d <- matrix(v, byrow = TRUE, ncol = 10)
-# dat <- as.data.frame(d)
-# dat$y <- factor(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, rep(0, 90)))
-#
-# ubSmoteExs2(dat, "y", 150)
+v <- rnorm(1000)
+d <- matrix(v, byrow = TRUE, ncol = 10)
+dat <- as.data.frame(d)
+dat$y <- factor(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, rep(0, 90)))
+
+ubSmoteExs2(dat, "y", 150)
+
+ubSMOTE(X[, 1:10], dat$y)
