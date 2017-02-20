@@ -10,7 +10,7 @@ ubSmoteExs2 <- function(data, tgt, N = 200, k = 5) {
 
     nomatr <- c()                                     # vector of nominal variables
     T <- matrix(nrow = dim(data)[1], ncol = dim(data)[2]-1)
-    
+
     for (col in seq.int(dim(T)[2])) {
         cl <- class(data[,col])
 
@@ -62,7 +62,7 @@ ubSmoteExs2 <- function(data, tgt, N = 200, k = 5) {
             # the attribute values of the generated case
             difs <- T[kNNs[neig], ] - T[i, ]
             new[(i-1)*nexs+n, ] <- T[i, ] + runif(1)*difs
-            
+
             for (a in nomatr) {
                 new[(i-1)*nexs+n, a] <- c(T[kNNs[neig],a],T[i,a])[1+round(runif(1),0)]
             }
@@ -74,17 +74,12 @@ ubSmoteExs2 <- function(data, tgt, N = 200, k = 5) {
     }
     newCases[,tgt] <- factor(rep(data[1,tgt],nrow(newCases)),levels=levels(data[,tgt]))
     colnames(newCases) <- colnames(data)
-    newCases
+    return(newCases)
 }
-
-v <- c(rnorm(3, 0.0, 1.0),
-       rnorm(3, 0.1, 1.1),
-       rnorm(3, 171, 10),
-       rnorm(3, 121, 2),
-       rnorm(3, 131, 2),
-       rnorm(3, 110, 1),
-       rnorm(3, 1.1, 1.1),
-       rnorm(3, 314, 11),
-       rnorm(3, 0.1, 1.0))
-d <- matrix(v, byrow = TRUE, ncol = 3)
-
+#
+# v <- rnorm(1000)
+# d <- matrix(v, byrow = TRUE, ncol = 10)
+# dat <- as.data.frame(d)
+# dat$y <- factor(c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, rep(0, 90)))
+#
+# ubSmoteExs2(dat, "y", 150)
