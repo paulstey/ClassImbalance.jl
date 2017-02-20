@@ -69,7 +69,7 @@ function column_ranges(X)
 end
 
 
-function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
+function smote_exs(dat::DataFrame, tgt::Symbol, perc = 200, k = 5)
     n, m = size(dat)
     T = Array{Float64, 2}(n, m-1)
 
@@ -84,18 +84,18 @@ function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
         end
     end
 
-    # when N < 100, only a percentage of cases will be SMOTEd
-    if N < 100
-        n_needed = round(Int, (N/100)*n)
+    # when perc < 100, only a percentage of cases will be SMOTEd
+    if perc < 100
+        n_needed = round(Int, (perc/100)*n)
         idx = sample(1:n, n_needed)
         T = T[idx, :]
-        N = 100
+        perc = 100
     end
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
 
-    n_exs = round(Int, floor(N/100))   # num. of artificial ex for each member of T
+    n_exs = round(Int, floor(perc/100))   # num. of artificial ex for each member of T
     xnew = Array{Float64, 2}(n_exs*n, p)
 
     for i = 1:n
@@ -144,8 +144,9 @@ end
 # This version of the function is to be used when we have no factor
 # variables. And it assumes input is simply a numeric matrix, where
 # the last column is the outcome (or target) variable.
-# NOTE: `N` is the new examples to be returned.
-function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
+# NOTE: `perc` is the percent of positive examples relative to total
+# sample size to be returned.
+function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, perc = 200, k = 5)
     n, m = size(dat)
     T = Array{Float64, 2}(n, m-1)
 
@@ -153,20 +154,19 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
         T[:, j] = convert(Array{Float64,1}, dat[:, j])
     end
 
-    # When N < 100, only a percentage of cases will be SMOTEd
-    if N < 100
-        n_needed = round(Int, (N/100)*n)
+    # When perc < 100, only a percentage of cases will be SMOTEd
+    if perc < 100
+        n_needed = round(Int, (perc/100)*n)
         idx = sample(1:n, n_needed)
         T = T[idx, :]
-        N = 100
+        perc = 100
     end
 
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
 
-    n_exs = round(Int, N/100)   # num. of artificial ex for each member of T
-    println("n_exs is $n_exs")
+    n_exs = round(Int, perc/100)   # num. of artificial ex for each member of T
     xnew = Array{Float64, 2}(n_exs*n, p)
 
     for i = 1:n
@@ -187,14 +187,14 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
         end
     end
     # Find what the minority class is in outcome
-    yval = mean(dat[:, tgt]) < 0.5 ? 1.0 : 0.0
+    yval = dat[1, tgt]
     new_cases = hcat(xnew, repeat([yval], inner = n_exs*n))
     return new_cases
 end
 
-
-X = rand(100, 10)
-y = vcat(zeros(90), ones(10))
+m = 150
+X = rand(m, 10)
+y = ones(m)
 X = hcat(X, y)
 
 smote_exs(X, 11)
@@ -202,18 +202,24 @@ smote_exs(X, 11)
 
 
 
-
 function cases_needed(y)
     n_minority = count(x -> x == 1, y)
     n = length(y)
-    n_majority = n - n_minority
-    n_needed = n_majority - n_minority
-    n_needed
+    0.5n - n_minority
 end
 
-w1 = [1, 1, 0, 0, 0, 0, 0]
+function perc_needed(y)
+    numer = cases_needed(y)
+    denom = count(x -> x == 1, y)
+    return numer/denom
+end
+
+
+w1 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 
 cases_needed(w1)
+perc_needed(w1)
+
 
 
 X = randn(100, 10)
