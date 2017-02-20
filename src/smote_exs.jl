@@ -15,7 +15,7 @@ function factor_cols(dat::DataFrame)
     return indcs
 end
 
-@code_warntype factor_cols(d)
+# @code_warntype factor_cols(d)
 
 
 function factor_to_float(v)
@@ -86,10 +86,11 @@ function smote_exs(dat::DataFrame, tgt::Symbol, N = 200, k = 5)
 
     # when N < 100, only a percentage of cases will be SMOTEd
     if N < 100
-        idx = sample(1:n, Int(round(N/100)*n))
+        n_needed = round(Int, (N/100)*n)
+        idx = sample(1:n, n_needed)
         T = T[idx, :]
+        N = 100
     end
-
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
@@ -143,7 +144,7 @@ end
 # This version of the function is to be used when we have no factor
 # variables. And it assumes input is simply a numeric matrix, where
 # the last column is the outcome (or target) variable.
-
+# NOTE: `N` is the new examples to be returned.
 function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
     n, m = size(dat)
     T = Array{Float64, 2}(n, m-1)
@@ -154,15 +155,18 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
 
     # When N < 100, only a percentage of cases will be SMOTEd
     if N < 100
-        idx = sample(1:n, Int(round(N/100)*n))
+        n_needed = round(Int, (N/100)*n)
+        idx = sample(1:n, n_needed)
         T = T[idx, :]
+        N = 100
     end
 
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
 
-    n_exs = round(Int, floor(N/100))   # num. of artificial ex for each member of T
+    n_exs = round(Int, N/100)   # num. of artificial ex for each member of T
+    println("n_exs is $n_exs")
     xnew = Array{Float64, 2}(n_exs*n, p)
 
     for i = 1:n
@@ -184,7 +188,7 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, N = 200, k = 5)
     end
     # Find what the minority class is in outcome
     yval = mean(dat[:, tgt]) < 0.5 ? 1.0 : 0.0
-    new_cases = hcat(xnew, repeat([yval], inner = n_exs*n)) 
+    new_cases = hcat(xnew, repeat([yval], inner = n_exs*n))
     return new_cases
 end
 
@@ -193,4 +197,25 @@ X = rand(100, 10)
 y = vcat(zeros(90), ones(10))
 X = hcat(X, y)
 
-smote_exs(X, 11, 150, 2)
+smote_exs(X, 11)
+
+
+
+
+
+function cases_needed(y)
+    n_minority = count(x -> x == 1, y)
+    n = length(y)
+    n_majority = n - n_minority
+    n_needed = n_majority - n_minority
+    n_needed
+end
+
+w1 = [1, 1, 0, 0, 0, 0, 0]
+
+cases_needed(w1)
+
+
+X = randn(100, 10)
+y = vcat(zeros(90), ones(10))
+ub_smote(X, y)
