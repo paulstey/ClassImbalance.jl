@@ -1,7 +1,6 @@
 # ubSmoteExs.R
 using DataFrames
 
-include("ub_smote.jl")
 
 # d = readtable("./data/people.csv", makefactors = true)
 
