@@ -1,6 +1,8 @@
 # ubSmoteExs.R
 using DataFrames
 
+include("ub_smote.jl")
+
 # d = readtable("./data/people.csv", makefactors = true)
 
 function factor_cols(dat::DataFrame)
@@ -69,7 +71,7 @@ function column_ranges(X)
 end
 
 
-function smote_exs(dat::DataFrame, tgt::Symbol, perc = 200, k = 5)
+function smote_exs(dat::DataFrame, tgt::Symbol, pct = 200, k = 5)
     n, m = size(dat)
     T = Array{Float64, 2}(n, m-1)
 
@@ -84,18 +86,18 @@ function smote_exs(dat::DataFrame, tgt::Symbol, perc = 200, k = 5)
         end
     end
 
-    # when perc < 100, only a percentage of cases will be SMOTEd
-    if perc < 100
-        n_needed = round(Int, (perc/100)*n)
+    # when pct < 100, only a percentage of cases will be SMOTEd
+    if pct < 100
+        n_needed = round(Int, (pct/100)*n)
         idx = sample(1:n, n_needed)
         T = T[idx, :]
-        perc = 100
+        pct = 100
     end
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
 
-    n_exs = round(Int, floor(perc/100))   # num. of artificial ex for each member of T
+    n_exs = round(Int, floor(pct/100))   # num. of artificial ex for each member of T
     xnew = Array{Float64, 2}(n_exs*n, p)
 
     for i = 1:n
@@ -144,9 +146,15 @@ end
 # This version of the function is to be used when we have no factor
 # variables. And it assumes input is simply a numeric matrix, where
 # the last column is the outcome (or target) variable.
-# NOTE: `perc` is the percent of positive examples relative to total
+# NOTE: `pct` is the pctent of positive examples relative to total
 # sample size to be returned.
-function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, perc = 200, k = 5)
+function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, pct = 200, k = 5)
+    if pct < 1
+        warn("Percent over-sampling cannot be less than 1\n
+              Setting `pct` to 1.")
+        pct = 1
+    end
+
     n, m = size(dat)
     T = Array{Float64, 2}(n, m-1)
 
@@ -154,19 +162,19 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, perc = 200, k = 5)
         T[:, j] = convert(Array{Float64,1}, dat[:, j])
     end
 
-    # When perc < 100, only a percentage of cases will be SMOTEd
-    if perc < 100
-        n_needed = round(Int, (perc/100)*n)
+    # When pct < 100, only a percentage of cases will be SMOTEd
+    if pct < 100
+        n_needed = round(Int, (pct/100)*n)
         idx = sample(1:n, n_needed)
         T = T[idx, :]
-        perc = 100
+        pct = 100
     end
 
     n, p = size(T)
     # display(T)
     ranges = column_ranges(T)
 
-    n_exs = round(Int, perc/100)   # num. of artificial ex for each member of T
+    n_exs = round(Int, pct/100)   # num. of artificial ex for each member of T
     xnew = Array{Float64, 2}(n_exs*n, p)
 
     for i = 1:n
@@ -208,17 +216,17 @@ function cases_needed(y)
     0.5n - n_minority
 end
 
-function perc_needed(y)
+function pct_needed(y)
     numer = cases_needed(y)
     denom = count(x -> x == 1, y)
-    return 100*numer/denom
+    return 100 * numer/denom
 end
 
 
 # w1 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 #
 # cases_needed(w1)
-# perc_needed(w1)
+# pct_needed(w1)
 #
 #
 #
