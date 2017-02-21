@@ -192,12 +192,12 @@ function smote_exs{S<:Number}(dat::Array{S, 2}, tgt::Int, perc = 200, k = 5)
     return new_cases
 end
 
-m = 150
-X = rand(m, 10)
-y = ones(m)
-X = hcat(X, y)
-
-smote_exs(X, 11)
+# m = 150
+# X = rand(m, 10)
+# y = ones(m)
+# X = hcat(X, y)
+#
+# smote_exs(X, 11)
 
 
 
@@ -211,17 +211,17 @@ end
 function perc_needed(y)
     numer = cases_needed(y)
     denom = count(x -> x == 1, y)
-    return numer/denom
+    return 100*numer/denom
 end
 
 
-w1 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-
-cases_needed(w1)
-perc_needed(w1)
-
-
-
-X = randn(100, 10)
-y = vcat(zeros(90), ones(10))
-ub_smote(X, y)
+# w1 = [1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+#
+# cases_needed(w1)
+# perc_needed(w1)
+#
+#
+#
+# X = randn(100, 10)
+# y = vcat(zeros(90), ones(10))
+# ub_smote(X, y)
