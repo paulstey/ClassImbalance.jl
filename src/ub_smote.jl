@@ -30,18 +30,16 @@ end
 
 # n_change(n, n1) = 0.5n - n1                        # give us number of new positive cases needed for balanced data
 
-function smote(X, y, k)
+function smote(X, y, k::Int)
     pct_minority = pct_needed(y)
-    println("Percent oversampling: $pct_minority")
+    # println("Percent oversampling: $pct_minority")
     n = length(y)
     n1 = count(x -> x == 1.0, y)
     needed = n - (n1 + n1*(pct_minority/100))
-    println("Needed: $needed")
+    # println("Needed: $needed")
     pct_majority = needed/(n1 * pct_minority/100) * 100
 
-    println("Percent undersampling: $pct_majority")
-
-
+    # println("Percent undersampling: $pct_majority")
     X_new, y_new = ub_smote(X, y, pct_minority, k, pct_majority)
     return (X_new, y_new)
 end

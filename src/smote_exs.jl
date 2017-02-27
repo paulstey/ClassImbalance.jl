@@ -59,7 +59,7 @@ function rscale(X, center, scale)
 end
 
 
-function column_ranges(X)
+function column_ranges{T<:Real}(X::Array{T, 2})
     p = size(X, 2)
     ranges = Array{Float64,1}(p)
 
@@ -209,13 +209,13 @@ end
 
 
 
-function cases_needed(y)
+function cases_needed{T<:Real}(y::Array{T, 1})
     n_minority = count(x -> x == 1, y)
     n = length(y)
     0.5n - n_minority
 end
 
-function pct_needed(y)
+function pct_needed{T<:Real}(y::Array{T, 1})
     numer = cases_needed(y)
     denom = count(x -> x == 1, y)
     return 100 * numer/denom
